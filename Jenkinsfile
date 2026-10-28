@@ -163,11 +163,11 @@ pipeline {
                             script {
                                 if (isUnix()) {
                                     sh """. ${ENV_LOC[NODE]}/bin/activate
-                                          invoke run-samples --pkg-source Nightly
+                                          invoke run-samples
                                     """
                                 } else {
                                     bat """CALL ${ENV_LOC[NODE]}\\Scripts\\activate
-                                          invoke run-samples --pkg-source Nightly
+                                          invoke run-samples
                                     """
                                 }
                             }
@@ -227,11 +227,11 @@ pipeline {
                             script {
                                 if (isUnix()) {
                                     sh """. ${ENV_LOC[NODE]}/bin/activate
-                                          invoke run-samples --pkg-source Public
+                                          invoke run-samples
                                     """
                                 } else {
                                     bat """CALL ${ENV_LOC[NODE]}\\Scripts\\activate
-                                          invoke run-samples --pkg-source Public
+                                          invoke run-samples
                                     """
                                 }
                             }

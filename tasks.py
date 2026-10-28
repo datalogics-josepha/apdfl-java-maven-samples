@@ -106,14 +106,6 @@ package_sources = ('Nightly', 'Public')
 
 repoflow_url = 'https://repo.datalogics.com/api/maven/datalogics-enterprise'
 
-# Samples for features that are in the nightly packages but not yet in a public
-# release. They are built and run against Nightly only, so adding a sample for a
-# new feature cannot stop the rest of the samples building against Public.
-# Remove the entry once the release that carries the feature is on apdfl-public.
-nightly_only_samples = (
-    'DocumentConversion/ConvertWordToPDF/',  # OfficeToPDF, after 21.4.0
-)
-
 # Generated settings files, one per package source. build/ is git-ignored.
 settings_dir = 'build'
 
@@ -161,15 +153,11 @@ def maven_settings(pkg_source):
 
 
 def check_pkg_source(pkg_source):
-    # An unrecognized value would otherwise build or run every sample against
-    # whatever happened to be resolved last, which passes without testing anything.
+    # An unrecognized value would otherwise build every sample against whatever
+    # happened to be resolved last, which passes without testing anything.
     if pkg_source not in package_sources:
         raise Exit(f'unknown package source {pkg_source!r}, '
                    f'expected one of {list(package_sources)}')
-
-
-def skip_for_pkg_source(sample, pkg_source):
-    return pkg_source != 'Nightly' and sample in nightly_only_samples
 
 
 def skip_on_mac_intel(sample):
@@ -237,10 +225,6 @@ def build_samples(ctx, pkg_source='Nightly'):
     for sample in samples_list:
         full_path = os.path.join(os.getcwd(), sample)
 
-        if skip_for_pkg_source(sample, pkg_source):
-            print(f'{sample} not yet in the {pkg_source} packages')
-            continue
-
         if skip_on_windows_arm(sample):
             print(f'{sample} not available on Windows ARM')
             continue
@@ -303,20 +287,15 @@ def execute_java_sample(target_dir, sample_name, full_path, apdfl_key):
         raise RuntimeError(f"{sample_name} sample failed to run.")
 
 
-@task(help={'pkg_source': f'Packages the samples were built against: {" or ".join(package_sources)}'})
-def run_samples(ctx, pkg_source='Nightly'):
+@task()
+def run_samples(ctx):
     """Runs the APDFL Java Maven samples"""
-    check_pkg_source(pkg_source)
     apdfl_key = os.environ.get("APDFL_KEY")
 
     if apdfl_key is None:
         raise ValueError("APDFL_KEY environment variable not set.")
 
     for sample in samples_list:
-        if skip_for_pkg_source(sample, pkg_source):
-            print(f'{sample} not yet in the {pkg_source} packages')
-            continue
-
         if skip_on_windows_arm(sample):
             print(f'{sample} not available on Windows ARM')
             continue
